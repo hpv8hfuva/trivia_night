@@ -4,9 +4,8 @@ include("database_credentials.php"); // define variables
 
 /** SETUP **/
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-$db = new mysqli($host, $username, $password, $dbname);
-// $db = new mysql("localhost", "root", "", "dbname"); // XAMPP Settings
-/*
+$mysqli = new mysqli($host, $username, $password, $dbname); 
+// $db = new mysql("localhost", "root", "", "dbname"); // XAMPP Settings 
 $error_msg = "";
 
 // Check if the user submitted the form (the form in the HTML below
@@ -25,7 +24,12 @@ if (isset($_POST["email"])) { // validate the email coming in
         
         if (!empty($data)) {
             // user was found!  Send to the game (with a GET parameter containing their email)
-            header("Location: trivia_question.php?email={$data[0]["email"]}");
+            if(!isset($_COOKIE["name"])) {
+                setcookie("name", $data[0]["name"], time()+3600, "/","", 0);
+                setcookie("email", $data[0]["email"], time()+3600, "/", "",  0); 
+                setcookie("score", $data[0]["score"], time()+3600, "/", "",  0);   
+            } 
+            header("Location: trivia_categories.php");
             exit();
         } else {
             // User was not found.  For our game, we'll just insert them!
@@ -34,15 +38,18 @@ if (isset($_POST["email"])) { // validate the email coming in
             if (!$insert->execute()) {
                 $error_msg = "Error creating new user";
             } 
-            // Send them to the game (with a GET parameter containing their email)
-            header("Location: trivia_question.php?email={$_POST["email"]}");
+            // Send them to the game (with a GET parameter containing their email) 
+            if(!isset($_COOKIE["name"])) {
+                setcookie("name", $data[0]["name"], time()+3600, "/","", 0);
+                setcookie("email", $data[0]["email"], time()+3600, "/", "",  0); 
+                setcookie("score", $data[0]["score"], time()+3600, "/", "",  0);   
+            } 
+            header("Location: trivia_categories.php");
             exit();
         }
     }
 
-}
-
-*/
+}  
 ?>
 <!DOCTYPE html>
 <html>
@@ -58,16 +65,39 @@ if (isset($_POST["email"])) { // validate the email coming in
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous"> 
     </head>
 
-    <body>
-
-
+    <body> 
         <div class="container" style="margin-top: 15px;">
             <div class="row col-xs-8">
-                <h1>CS4640 Television Trivia Game - Get Started</h1>
+                <h1>Trivia Night</h1>
                 <p> Welcome to our trivia game!  To get started, login below or enter a new username and password to create an account</p>
             </div>
             <div class="row justify-content-center">
-                 
+                <div class="col-4">
+                <?php
+                    if (!empty($error_msg)) {
+                        echo "<div class='alert alert-danger'>$error_msg</div>";
+                    }
+                ?>
+                <form action="trivia_login.php" method="post">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email"/>
+                    </div>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" name="name"/>
+                    </div>
+                    <!--
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password"/>
+                    </div>
+                    -->
+                    <div class="text-center">                
+                    <button type="submit" class="btn btn-primary">Log in / Create Account</button>
+                    </div>
+                </form>
+                </div>
             </div>
         </div>
 
