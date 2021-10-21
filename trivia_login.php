@@ -26,12 +26,10 @@ if (isset($_POST["email"])) { // validate the email coming in
         
         if (!empty($data)) {
             // user was found!  Send to the game (with a GET parameter containing their email)
-            if(!isset($_COOKIE["name"])) {
-                setcookie("name", $data[0]["name"], time()+3600, "/","", 0);
-                setcookie("email", $data[0]["email"], time()+3600, "/", "",  0); 
-                setcookie("score", $data[0]["score"], time()+3600, "/", "",  0);   
-            } 
-            header("Location: trivia_categories.php");
+            setcookie("name", $data[0]["name"], time()+3600, "/","", 0);
+            setcookie("email", $data[0]["email"], time()+3600, "/", "",  0); 
+            setcookie("score", $data[0]["score"], time()+3600, "/", "",  0);   
+            header("Location: trivia_instructions.php");
             exit();
         } else {
             // User was not found.  For our game, we'll just insert them!
@@ -42,12 +40,12 @@ if (isset($_POST["email"])) { // validate the email coming in
                 $error_msg = "Error creating new user";
             } 
             // Send them to the game (with a GET parameter containing their email) 
-            if(!isset($_COOKIE["name"])) {
+            if(!isset($_COOKIE["email"])) {
                 setcookie("name", $data[0]["name"], time()+3600, "/","", 0);
                 setcookie("email", $data[0]["email"], time()+3600, "/", "",  0); 
                 setcookie("score", $data[0]["score"], time()+3600, "/", "",  0);   
             } 
-            header("Location: trivia_categories.php");
+            header("Location: trivia_instructions.php");
             exit();
         }
     }

@@ -45,10 +45,9 @@ if (isset($_COOKIE["email"])) { // validate the email coming in
     exit();
 }
 
-
-
 // Read a random question from the database
-$res = $mysqli->query("select id, points, question from question order by rand() limit 1;");
+$topic = $_GET["category"];
+$res = $mysqli->query("select id, points, question, genre from question where genre='$topic' order by rand() limit 1;");
 if ($res === false) {
     die("MySQL database failed");
 }
@@ -56,6 +55,11 @@ $data = $res->fetch_all(MYSQLI_ASSOC);
 if (!isset($data[0])) {
     die("No questions in the database");
 }
+
+// Update user last category played
+$stmt = $mysqli->prepare("update user set last_category = ? where email = ?;");
+$stmt->bind_param("ss", $_GET["category"], $_COOKIE["email"]);    
+$stmt->execute(); 
 
 $question = $data[0]; 
 
@@ -123,7 +127,7 @@ if (isset($_POST["questionid"])) {
             </div>
             <div class="row">
                 <div class="col-xs-8 mx-auto">
-                <form action="trivia_question.php" method="post">
+                <form action="trivia_question.php?category=<?=$_GET["category"]?>"" method="post">
                     <div class="h-100 p-5 bg-light border rounded-3">
                     <h2>Question</h2>
                     <p><?=$question["question"]?></p>
