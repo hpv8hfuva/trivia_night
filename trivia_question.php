@@ -86,9 +86,10 @@ if (isset($_POST["questionid"])) {
             // found question
             if ($data[0]["answer"] == $answer) {
                 $message = "<div class='alert alert-success'><b>$answer</b> was correct!</div>";  
-                $_COOKIE["score"] = intval($_COOKIE["score"]) + intval($_POST["points"]);
-                print_r($_COOKIE["score"]);
-                
+                $_COOKIE["score"] = $data[0]["points"] + $user["score"];   
+                $stmt = $mysqli->prepare("update user set score = ? where email = ?;");
+                $stmt->bind_param("is", $_COOKIE["score"], $_COOKIE["email"]);    
+                $stmt->execute(); 
             } else { 
                 $message = "<div class='alert alert-danger'><b>$answer</b> was incorrect! The answer was: {$data[0]['answer']}</div>"; 
             }

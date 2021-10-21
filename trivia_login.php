@@ -8,6 +8,8 @@ $mysqli = new mysqli($host, $username, $password, $dbname);
 // $db = new mysql("localhost", "root", "", "dbname"); // XAMPP Settings 
 $error_msg = "";
 
+session_start();
+
 // Check if the user submitted the form (the form in the HTML below
 // submits back to this page, which is okay for now.  We will check for
 // form data and determine whether to re-show this form with a message
@@ -33,8 +35,9 @@ if (isset($_POST["email"])) { // validate the email coming in
             exit();
         } else {
             // User was not found.  For our game, we'll just insert them!
-            $insert = $mysqli->prepare("insert into user (name, email) values (?, ?);");
-            $insert->bind_param("ss", $_POST["name"], $_POST["email"]);
+            $hash = password_hash($_POST["password"], PASSWORD_DEFAULT);
+            $insert = $mysqli->prepare("insert into user (name, email, password) values (?, ?, ?);");
+            $insert->bind_param("sss", $_POST["name"], $_POST["email"], $hash);
             if (!$insert->execute()) {
                 $error_msg = "Error creating new user";
             } 
@@ -50,6 +53,7 @@ if (isset($_POST["email"])) { // validate the email coming in
     }
 
 }  
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -87,12 +91,10 @@ if (isset($_POST["email"])) { // validate the email coming in
                         <label for="name" class="form-label">Name</label>
                         <input type="text" class="form-control" id="name" name="name"/>
                     </div>
-                    <!--
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
                         <input type="password" class="form-control" id="password" name="password"/>
                     </div>
-                    -->
                     <div class="text-center">                
                     <button type="submit" class="btn btn-primary">Log in / Create Account</button>
                     </div>
