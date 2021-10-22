@@ -23,17 +23,20 @@ if (isset($_POST["email"])) { // validate the email coming in
         // result succeeded
         $res = $stmt->get_result();
         $data = $res->fetch_all(MYSQLI_ASSOC);
-        
+        $hash = password_hash($_POST["password"], PASSWORD_DEFAULT);
+
         if (empty($data)) { 
             // User was not found.  For our game, we'll just insert them!
-            $hash = password_hash($_POST["password"], PASSWORD_DEFAULT);
             $insert = $mysqli->prepare("insert into user (name, email, password) values (?, ?, ?);");
             $insert->bind_param("sss", $_POST["name"], $_POST["email"], $hash);
             if (!$insert->execute()) {
                 $error_msg = "Error creating new user";
             } 
+        } else if(!password_verify($_POST["password"], $data[0]["password"])) {
+            header("Location: trivia_login.php");
+            exit();
         }
-        // Send them to the game (with a GET parameter containing their email)  
+        // Send them to the game (with a GET parameter containing their email)   
         setcookie("name", $data[0]["name"], time()+3600, "/","", 0);
         setcookie("email", $data[0]["email"], time()+3600, "/", "",  0); 
         setcookie("score", $data[0]["score"], time()+3600, "/", "",  0);  
