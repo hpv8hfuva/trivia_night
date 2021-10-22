@@ -55,10 +55,9 @@ $categories = $results->fetch_all(MYSQLI_ASSOC);
     </head>
 
     <body> 
-         <div class="container" style="margin-top: 15px;">
+         <div class="container" style="margin-top: 15px; text-align: center;">
             <div class="row col-xs-8">
-                <h1>Trivia Night</h1>
-                <p> Welcome to our trivia game!  To get started, login below or enter a new username and password to create an account</p>
+                <h1>Please Choose a Trivia Category</h1>
             </div>
             
             <div class="row justify-content-center"> 
@@ -66,11 +65,11 @@ $categories = $results->fetch_all(MYSQLI_ASSOC);
                     foreach($categories as $category) { 
                         ?>
                         <div class="col-sm-6">
-                            <div class="card">
+                            <div class="card" style="margin: 20px;">
                                 <div class="card-body">
                                     <h5 class="card-title"><?= $category["genre"]?></h5>
                                     <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                                    <a href="trivia_question.php" class="btn btn-primary">Let's play</a>
+                                    <a href="trivia_question.php?category=<?= $category["genre"]?>" class="btn btn-primary">Let's play</a>
                                 </div>
                             </div>
                         </div>

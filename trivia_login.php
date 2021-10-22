@@ -37,7 +37,7 @@ if (isset($_POST["email"])) { // validate the email coming in
         setcookie("name", $data[0]["name"], time()+3600, "/","", 0);
         setcookie("email", $data[0]["email"], time()+3600, "/", "",  0); 
         setcookie("score", $data[0]["score"], time()+3600, "/", "",  0);  
-        header("Location: trivia_categories.php");
+        header("Location: trivia_instructions.php");
         exit();
     }
 
