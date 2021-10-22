@@ -2,12 +2,11 @@
 /** DATABASE SETUP **/
 include("database_credentials.php"); // define variables
 
+print_r($_COOKIE["question_history"]);
 /** SETUP **/
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $mysqli = new mysqli($host, $username, $password, $dbname);
-// $db = new mysql("localhost", "root", "", "dbname"); // XAMPP Settings
-$user = null;
-
+// $db = new mysql("localhost", "root", "", "dbname"); // XAMPP Settings 
 // Example using URL rewriting: we add the user information
 // directly to the URI with a query string (GET parameters)
 
@@ -30,13 +29,7 @@ if (isset($_COOKIE["email"])) { // validate the email coming in
         // The user WAS found (SECURITY ALERT: we only checked against
         // their email address -- this is not a secure method of
         // keeping track of users!  We more likely want a unique
-        // session ID for this user instead!
-        $user = $data[0];
-        if(!isset($_COOKIE["name"])) { 
-            setcookie("name", $user["name"], time()+3600, "/","", 0);
-            setcookie("email", $user["email"], time()+3600, "/", "",  0); 
-            setcookie("score", $user["score"], time()+3600, "/", "",  0); 
-        } 
+        // session ID for this user instead!  
     }
 } else {
     // User did not supply email GET parameter, so send them
@@ -64,6 +57,9 @@ $message = "";
 
 // If the user submitted (POST) an answer to a question, we should check
 // to see if they got it right!
+$updated_points = $_COOKIE["score"];
+$test = isset($_COOKIE["question_history"]) ? $_COOKIE["question_history"]: array(); 
+
 if (isset($_POST["questionid"])) {
     $qid = $_POST["questionid"];
     $answer = $_POST["answer"]; 
@@ -83,21 +79,23 @@ if (isset($_POST["questionid"])) {
         if (!isset($data[0])) {
             $message = "<div class='alert alert-info'>Error: could not find previous question</div>";
         } else {
-            // found question
+            // found question 
             if ($data[0]["answer"] == $answer) {
-                $message = "<div class='alert alert-success'><b>$answer</b> was correct!</div>";  
-                $_COOKIE["score"] = $data[0]["points"] + $user["score"];   
+                $message = "<div class='alert alert-success'><b>$answer</b> was correct!</div>";    
+                $updated_points += $data[0]["points"];
+                setcookie("score", $data[0]["points"] + $_COOKIE["score"], time()+3600, "/", "",  0); 
                 $stmt = $mysqli->prepare("update user set score = ? where email = ?;");
                 $stmt->bind_param("is", $_COOKIE["score"], $_COOKIE["email"]);    
                 $stmt->execute(); 
             } else { 
                 $message = "<div class='alert alert-danger'><b>$answer</b> was incorrect! The answer was: {$data[0]['answer']}</div>"; 
-            }
+            } 
+            setcookie("question_history[$qid]", $qid, time()+3600, "/", "",  0);  
+            $test[$qid] = $qid;
         }
         
-    }
-}
-
+    } 
+} 
 ?>
 <!DOCTYPE html>
 <html>
@@ -119,26 +117,57 @@ if (isset($_POST["questionid"])) {
         <div class="container" style="margin-top: 15px;">
             <div class="row col-xs-8">
                 <h1>CS4640 Television Trivia Game</h1>
-                <h3>Hello <?=$user["name"]?>! Score: <?=$user["score"]?></h3>
+                <h3>Hello <?=$_COOKIE["name"]?>! Score: <?=$updated_points?></h3>
             </div>
             <div class="row">
                 <div class="col-xs-8 mx-auto">
-                <form action="trivia_question.php" method="post">
-                    <div class="h-100 p-5 bg-light border rounded-3">
-                    <h2>Question</h2>
-                    <p><?=$question["question"]?></p>
-                    <input type="hidden" name="questionid" value="<?=$question["id"]?>"/>
-                    <input type="hidden" name="points" value="<?=$question["points"]?>"/>
-                    </div>
-                    <?=$message?>
-                    <div class="h-10 p-5 mb-3">
-                        <input type="text" class="form-control" id="answer" name="answer" placeholder="Type your answer here">
-                    </div>
-                    <div class="text-center">                
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                    <a href="trivia_login.php" class="btn btn-danger">Log out</a>
-                    </div>
-                </form>
+                    <div class="accordion" id="accordionExample">  
+                    <?php     
+                        $test = array();
+                        foreach($test as $qid) { 
+                            $stmt = $mysqli->prepare("select * from question where id = ?;");
+                            $stmt->bind_param("i", $qid);
+                            $stmt->execute();
+                            $res = $stmt->get_result();
+                            $question_data = $res->fetch_all(MYSQLI_ASSOC); 
+
+                            ?>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading<?=$qid?>">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<?=$qid?>" aria-expanded="false" aria-controls="collapse<?=$qid?>">
+                                        <?=$question_data[0]["question"]?>
+                                    </button>
+                                </h2>
+                                <div id="collapse<?=$qid?>" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        <strong><?=$question_data[0]["answer"]?></strong>
+                                    </div> 
+                                </div>
+                            </div>
+                            <?php
+                        } 
+                    ?>  
+                    </div>  
+                </div>
+            </div>
+            <div>
+                <div> 
+                    <form action="trivia_question.php" method="post">
+                        <div class="h-100 p-5 bg-light border rounded-3">
+                        <h2>Question</h2>
+                        <p><?=$question["question"]?></p>
+                        <input type="hidden" name="questionid" value="<?=$question["id"]?>"/>
+                        <input type="hidden" name="points" value="<?=$question["points"]?>"/>
+                        </div>
+                        <?=$message?>
+                        <div class="h-10 p-5 mb-3">
+                            <input type="text" class="form-control" id="answer" name="answer" placeholder="Type your answer here">
+                        </div>
+                        <div class="text-center">                
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <a href="trivia_login.php" class="btn btn-danger">Log out</a>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

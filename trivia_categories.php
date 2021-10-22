@@ -2,7 +2,7 @@
 /** DATABASE SETUP **/
 include("database_credentials.php"); // define variables
 
-/** SETUP **/
+/** SETUP **/ 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $mysqli = new mysqli($host, $username, $password, $dbname); 
 // $db = new mysql("localhost", "root", "", "dbname"); // XAMPP Settings 
@@ -26,7 +26,7 @@ if (isset($_COOKIE["email"])) { // validate the email coming in
             // user was NOT found!
             header("Location: trivia_login.php");
             exit();
-        }  
+        }   
     }
 } else {
     // User did not supply email GET parameter, so send them

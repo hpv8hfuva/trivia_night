@@ -24,16 +24,7 @@ if (isset($_POST["email"])) { // validate the email coming in
         $res = $stmt->get_result();
         $data = $res->fetch_all(MYSQLI_ASSOC);
         
-        if (!empty($data)) {
-            // user was found!  Send to the game (with a GET parameter containing their email)
-            if(!isset($_COOKIE["name"])) {
-                setcookie("name", $data[0]["name"], time()+3600, "/","", 0);
-                setcookie("email", $data[0]["email"], time()+3600, "/", "",  0); 
-                setcookie("score", $data[0]["score"], time()+3600, "/", "",  0);   
-            } 
-            header("Location: trivia_categories.php");
-            exit();
-        } else {
+        if (empty($data)) { 
             // User was not found.  For our game, we'll just insert them!
             $hash = password_hash($_POST["password"], PASSWORD_DEFAULT);
             $insert = $mysqli->prepare("insert into user (name, email, password) values (?, ?, ?);");
@@ -41,15 +32,13 @@ if (isset($_POST["email"])) { // validate the email coming in
             if (!$insert->execute()) {
                 $error_msg = "Error creating new user";
             } 
-            // Send them to the game (with a GET parameter containing their email) 
-            if(!isset($_COOKIE["name"])) {
-                setcookie("name", $data[0]["name"], time()+3600, "/","", 0);
-                setcookie("email", $data[0]["email"], time()+3600, "/", "",  0); 
-                setcookie("score", $data[0]["score"], time()+3600, "/", "",  0);   
-            } 
-            header("Location: trivia_categories.php");
-            exit();
         }
+        // Send them to the game (with a GET parameter containing their email)  
+        setcookie("name", $data[0]["name"], time()+3600, "/","", 0);
+        setcookie("email", $data[0]["email"], time()+3600, "/", "",  0); 
+        setcookie("score", $data[0]["score"], time()+3600, "/", "",  0);  
+        header("Location: trivia_categories.php");
+        exit();
     }
 
 }  
