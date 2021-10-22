@@ -63,6 +63,18 @@ $message = "";
 $updated_points = $_COOKIE["score"];
 $test = isset($_COOKIE["question_history"]) ? $_COOKIE["question_history"]: array(); 
 
+// set cookie counter
+if (!isset($_COOKIE["count"])){
+    setcookie("count", 0, time()+3600, "/", "",  0);
+} else {
+    setcookie("count", $_COOKIE["count"]+1, time()+3600, "/", "",  0);
+}
+
+if((int)$_COOKIE["count"] >= 10){
+    header("Location: trivia_instructions.php");
+    exit();
+}
+
 if (isset($_POST["questionid"])) {
     $qid = $_POST["questionid"];
     $answer = $_POST["answer"]; 
@@ -157,6 +169,7 @@ if (isset($_POST["questionid"])) {
                     <form action="trivia_question.php?category=<?=$_GET["category"]?>" method="post">
                         <div class="h-100 p-5 bg-light border rounded-3">
                         <h2>Question</h2>
+                        <h5><?=(10-(int)$_COOKIE["count"]) ?> question(s) left to play!</h5>
                         <p><?=$question["question"]?></p>
                         <input type="hidden" name="questionid" value="<?=$question["id"]?>"/>
                         <input type="hidden" name="points" value="<?=$question["points"]?>"/>

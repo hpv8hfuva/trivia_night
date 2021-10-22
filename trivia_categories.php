@@ -39,11 +39,15 @@ $results = $mysqli->query("select distinct(genre) from question;");
 $categories = $results->fetch_all(MYSQLI_ASSOC);
 
 // reset cookies
-foreach ($_COOKIE["question_history"] as $key => $val){
-    unset($_COOKIE["question_history[$key]"]);
-    setcookie("question_history[$key]", "", time()+3600, "/", "",  0);
+if(isset($_COOKIE["question_history"])){
+    foreach ($_COOKIE["question_history"] as $key => $val){
+        unset($_COOKIE["question_history[$key]"]);
+        setcookie("question_history[$key]", "", time()+3600, "/", "",  0);
+    }
 }
-
+if(isset($_COOKIE["count"])){
+    setcookie("count", 0, time()+3600, "/", "",  0);
+}
 
 ?>
 <!DOCTYPE html>
