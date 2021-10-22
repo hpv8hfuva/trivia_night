@@ -2,7 +2,6 @@
 /** DATABASE SETUP **/
 include("database_credentials.php"); // define variables
 
-print_r($_COOKIE["question_history"]);
 /** SETUP **/
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $mysqli = new mysqli($host, $username, $password, $dbname);
@@ -127,7 +126,6 @@ if (isset($_POST["questionid"])) {
                 <div class="col-xs-8 mx-auto">
                     <div class="accordion" id="accordionExample">  
                     <?php     
-                        $test = array();
                         foreach($test as $qid) { 
                             $stmt = $mysqli->prepare("select * from question where id = ?;");
                             $stmt->bind_param("i", $qid);
